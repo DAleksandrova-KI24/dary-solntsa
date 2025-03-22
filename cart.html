@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="ru">
+<header>
+        <h1><a href="index.html" style="color: white; text-decoration: none;">Дар Солнца</a></h1>
+        <nav>
+            <ul>
+                <li><a href="index.html">Главная</a></li>
+                <li><a href="products.html">Каталог</a></li>
+                <li><a href="about.html">О нас</a></li>
+                <li><a href="contacts.html">Контакты</a></li>
+                <li><a href="cart.html">Корзина</a></li>
+                <li><a href="profile.html">Вход</a></li>
+            </ul>
+        </nav>
+</header>
+    
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Корзина</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h2>Ваша корзина</h2>
+        <ul id="cartItems"></ul>
+        <button id="checkoutButton">Оформить заказ</button>
+        <h3>Заполните данные для оформления заказа</h3>
+        <form id="checkoutForm">
+            <input type="text" name="name" placeholder="Ваше имя" required>
+            <input type="text" name="address" placeholder="Адрес доставки" required>
+            <input type="tel" name="phone" placeholder="Телефон" required>
+            <button type="submit">Оформить заказ</button>
+        </form>
+        <p id="orderMessage"></p>
+
+    </div>
+
+    <script>
+        async function loadCart() {
+            let response = await fetch("http://localhost/dary-solntsa/backend/cart.php");
+            let cart = await response.json();
+            let cartList = document.getElementById("cartItems");
+
+            cartList.innerHTML = "";
+            for (let id in cart) {
+                let item = document.createElement("li");
+                item.innerHTML = `
+                    Товар ID: ${id}, Количество: ${cart[id]} 
+                    <button onclick="removeFromCart(${id})">Удалить</button>
+                `;
+                cartList.appendChild(item);
+            }
+        }
+
+        async function removeFromCart(id) {
+            await fetch("http://localhost/dary-solntsa/backend/cart.php", {
+                method: "DELETE",
+                body: JSON.stringify({ id: id }),
+                headers: { "Content-Type": "application/json" }
+            });
+            loadCart();
+        }
+
+        document.getElementById("checkoutButton").addEventListener("click", async function() {
+            let response = await fetch("http://localhost/dary-solntsa/backend/checkout.php", { method: "POST" });
+            let result = await response.json();
+            alert(result.message);
+            loadCart();
+        });
+
+        loadCart();
+    </script>
+    <script>
+        document.getElementById("checkoutForm").addEventListener("submit", async function(event) {
+            event.preventDefault();
+            let formData = new FormData(this);
+    
+            let response = await fetch("http://localhost/dary-solntsa/backend/checkout.php", {
+                method: "POST",
+                body: formData
+            });
+    
+            let result = await response.json();
+            document.getElementById("orderMessage").innerText = result.message;
+            
+            if (result.status === "success") {
+                setTimeout(() => {
+                    window.location.href = "orders.html";
+                }, 2000);
+            }
+        });
+    </script>  
+    <footer>
+        <p>&copy; 2025 Дар Солнца – Магазин янтаря</p>
+    </footer>
+    
+</body>
+</html>

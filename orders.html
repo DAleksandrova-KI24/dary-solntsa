@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="ru">
+<header>
+    <h1><a href="index.html" style="color: white; text-decoration: none;">Дар Солнца</a></h1>
+    <nav>
+        <ul>
+            <li><a href="index.html">Главная</a></li>
+            <li><a href="products.html">Каталог</a></li>
+            <li><a href="about.html">О нас</a></li>
+            <li><a href="contacts.html">Контакты</a></li>
+            <li><a href="cart.html">Корзина</a></li>
+            <li><a href="profile.html">Вход</a></li>
+        </ul>
+    </nav>
+</header>
+
+<head>
+    <link rel="stylesheet" href="styles.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Мои заказы</title>
+</head>
+<body>
+    <h2>Мои заказы</h2>
+    <ul id="ordersList"></ul>
+
+    <script>
+        async function loadOrders() {
+            let response = await fetch("http://localhost/dary-solntsa/backend/orders.php");
+            let result = await response.json();
+
+            let ordersList = document.getElementById("ordersList");
+            ordersList.innerHTML = "";
+
+            if (result.status === "success") {
+                result.orders.forEach(order => {
+                    let item = document.createElement("li");
+                    item.innerHTML = `
+                        Заказ №${order.id} | Сумма: ${order.total_price} руб. | 
+                        Статус: ${order.status} | Дата: ${order.created_at} <br>
+                        Имя: ${order.name} | Адрес: ${order.address} | Телефон: ${order.phone}
+                    `;
+                    ordersList.appendChild(item);
+                });
+            } else {
+                ordersList.innerHTML = "<p>У вас нет заказов.</p>";
+            }
+        }
+
+        loadOrders();
+    </script>
+    <footer>
+        <p>&copy; 2025 Дар Солнца – Магазин янтаря</p>
+    </footer>
+    
+</body>
+</html>
